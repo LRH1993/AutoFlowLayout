@@ -19,7 +19,7 @@ public class AutoFlowLayout extends LinearLayout  {
     private List<List<View>> mAllViews = new ArrayList<List<View>>();
     private Context mContext;
     private LayoutInflater mLayoutInflater;
-
+    private boolean mIsSingleLine;
     /**
      * 记录每一行的最大高度
      */
@@ -142,7 +142,9 @@ public class AutoFlowLayout extends LinearLayout  {
                 mAllViews.add(lineViews);
                 lineWidth = 0;// 重置行宽
                 lineViews = new ArrayList<View>();
-                break;
+                if (mIsSingleLine) {
+                    break;
+                }
             }
             /**
              * 如果不需要换行，则累加
@@ -206,4 +208,22 @@ public class AutoFlowLayout extends LinearLayout  {
             addView(views.get(i));
         }
     }
+
+    /**
+     * 设置最多显示的行数
+     * @param number
+     */
+    public void setMaxLines(int number) {
+
+    }
+
+    /**
+     * 是否只显示单行
+     * @param isSingle
+     */
+    public void setSingleLine(boolean isSingle) {
+        mIsSingleLine = isSingle;
+    }
+
+
 }
