@@ -17,8 +17,6 @@ public class AutoFlowLayout extends LinearLayout  {
      * 存储所有的View，按行记录
      */
     private List<List<View>> mAllViews = new ArrayList<List<View>>();
-    private Context mContext;
-    private LayoutInflater mLayoutInflater;
     private boolean mIsSingleLine;
     /**
      * 记录每一行的最大高度
@@ -28,24 +26,14 @@ public class AutoFlowLayout extends LinearLayout  {
 
     public AutoFlowLayout(Context context) {
         super(context);
-        mContext = context;
-        init();
     }
 
     public AutoFlowLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
-        init();
     }
 
     public AutoFlowLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext = context;
-        init();
-    }
-
-    private void init() {
-        mLayoutInflater = LayoutInflater.from(getContext());
     }
 
     @Override
