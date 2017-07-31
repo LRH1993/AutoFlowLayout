@@ -32,7 +32,12 @@ public class AutoFlowLayout extends LinearLayout  {
     /**
      * 记录当前行数
      */
-    private int count;
+    private int mCount;
+
+    /**
+     * 是否还有数据没显示
+     */
+    private boolean mHasMoreData;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -98,11 +103,13 @@ public class AutoFlowLayout extends LinearLayout  {
                 height += lineHeight;
                 // 开启记录下一行的高度
                 lineHeight = childHeight;
-                count++;
-                if (count>=mMaxLineNumbers) {
+                mCount++;
+                if (mCount>=mMaxLineNumbers) {
+                    setHasMoreData(i+1,cCount);
                     break;
                 }
                 if (mIsSingleLine) {
+                    setHasMoreData(i+1,cCount);
                     break;
                 }
             } else
@@ -152,11 +159,13 @@ public class AutoFlowLayout extends LinearLayout  {
                 mAllViews.add(lineViews);
                 lineWidth = 0;// 重置行宽
                 lineViews = new ArrayList<View>();
-                count++;
-                if (count>=mMaxLineNumbers) {
+                mCount++;
+                if (mCount>=mMaxLineNumbers) {
+                    setHasMoreData(i+1,cCount);
                     break;
                 }
                 if (mIsSingleLine) {
+                    setHasMoreData(i+1,cCount);
                     break;
                 }
             }
@@ -209,6 +218,17 @@ public class AutoFlowLayout extends LinearLayout  {
         }
     }
 
+    /**
+     * 判断是否还有跟多View未展示
+     * @param i 当前展示的View
+     * @param count 总共需要展示的View
+     */
+    private void setHasMoreData(int i, int count) {
+        if (i<count){
+            mHasMoreData = true;
+        }
+    }
+
     public void setAllViews(List<View> views) {
         removeAllViews();
         if (views == null || views.size() == 0) {
@@ -235,5 +255,28 @@ public class AutoFlowLayout extends LinearLayout  {
         mIsSingleLine = isSingle;
     }
 
+    /**
+     * 是否单行显示
+     * @return true 单行显示 false 多行显示
+     */
+    public boolean isSingleLine() {
+        return mIsSingleLine;
+    }
+
+    /**
+     * 支持显示的最大行数
+     * @return 最大行数
+     */
+    public int getMaxLineNumbers() {
+        return mMaxLineNumbers;
+    }
+
+    /**
+     * 是否还有更多数据未显示
+     * @return true 还有未显示数据 false 完全显示
+     */
+    public boolean hasMoreData() {
+        return mHasMoreData;
+    }
 
 }
