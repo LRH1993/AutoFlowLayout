@@ -7,7 +7,7 @@
 
     <com.example.lvruheng.autoflowlayout.AutoFlowLayout
         android:id="@+id/afl_cotent"
+        app:maxLines="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
 </RelativeLayout>

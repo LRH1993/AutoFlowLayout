@@ -1,9 +1,9 @@
 package com.example.lvruheng.autoflowlayout;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
@@ -17,25 +17,41 @@ public class AutoFlowLayout extends LinearLayout  {
      * 存储所有的View，按行记录
      */
     private List<List<View>> mAllViews = new ArrayList<List<View>>();
+    /**
+     * 记录设置单行显示的标志
+     */
     private boolean mIsSingleLine;
     /**
      * 记录每一行的最大高度
      */
     private List<Integer> mLineHeight = new ArrayList<Integer>();
-    private String mCategoryName;
-
+    /**
+     * 记录设置最大行数量
+     */
+    private int mMaxLineNumbers;
+    /**
+     * 记录当前行数
+     */
+    private int count;
     public AutoFlowLayout(Context context) {
         super(context);
     }
 
     public AutoFlowLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context,attrs);
     }
 
     public AutoFlowLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context,attrs);
     }
-
+    private void init(Context context, AttributeSet attrs) {
+        TypedArray ta = context.obtainStyledAttributes(attrs,R.styleable.AutoFlowLayout);
+        mIsSingleLine = ta.getBoolean(R.styleable.AutoFlowLayout_singleLine,false);
+        mMaxLineNumbers = ta.getInteger(R.styleable.AutoFlowLayout_maxLines,Integer.MAX_VALUE);
+        ta.recycle();
+    }
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -82,7 +98,13 @@ public class AutoFlowLayout extends LinearLayout  {
                 height += lineHeight;
                 // 开启记录下一行的高度
                 lineHeight = childHeight;
-                break;
+                count++;
+                if (count>=mMaxLineNumbers) {
+                    break;
+                }
+                if (mIsSingleLine) {
+                    break;
+                }
             } else
             // 否则累加值lineWidth,lineHeight取最大高度
             {
@@ -130,6 +152,10 @@ public class AutoFlowLayout extends LinearLayout  {
                 mAllViews.add(lineViews);
                 lineWidth = 0;// 重置行宽
                 lineViews = new ArrayList<View>();
+                count++;
+                if (count>=mMaxLineNumbers) {
+                    break;
+                }
                 if (mIsSingleLine) {
                     break;
                 }
@@ -155,10 +181,6 @@ public class AutoFlowLayout extends LinearLayout  {
             lineViews = mAllViews.get(i);
             // 当前行的最大高度
             lineHeight = mLineHeight.get(i);
-
-            Log.e("SingleLineLinerLayout", "第" + i + "行 ：" + lineViews.size() + " , " + lineViews);
-            Log.e("SingleLineLinerLayout", "第" + i + "行， ：" + lineHeight);
-
             // 遍历当前行所有的View
             for (int j = 0; j < lineViews.size(); j++) {
                 View child = lineViews.get(j);
@@ -202,7 +224,7 @@ public class AutoFlowLayout extends LinearLayout  {
      * @param number
      */
     public void setMaxLines(int number) {
-
+        mMaxLineNumbers = number;
     }
 
     /**

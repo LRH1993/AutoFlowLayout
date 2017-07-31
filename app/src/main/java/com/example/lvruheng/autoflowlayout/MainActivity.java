@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
             tvAttrTag.setText(mData[i]);
             final String content = mData[i];
             tvAttrTag.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(MainActivity.this,content,Toast.LENGTH_SHORT).show();
