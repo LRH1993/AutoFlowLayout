@@ -23,13 +23,13 @@ public class MainActivity extends AppCompatActivity {
             TextView tvAttrTag = (TextView) item.findViewById(R.id.tv_attr_tag);
             tvAttrTag.setText(mData[i]);
             final String content = mData[i];
-            tvAttrTag.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(MainActivity.this,content,Toast.LENGTH_SHORT).show();
-                }
-            });
             mFlowLayout.addView(item);
         }
+        mFlowLayout.setOnItemClickListener(new AutoFlowLayout.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position,View view) {
+                Toast.makeText(MainActivity.this,mData[position],Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

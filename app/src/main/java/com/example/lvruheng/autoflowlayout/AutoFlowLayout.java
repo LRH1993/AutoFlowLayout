@@ -38,6 +38,14 @@ public class AutoFlowLayout extends LinearLayout  {
      * 是否还有数据没显示
      */
     private boolean mHasMoreData;
+    /**
+     * 子View的点击事件
+     */
+    private OnItemClickListener mOnItemClickListener;
+    /**
+     * 当前view的索引
+     */
+    private int  mCurrentItemIndex=-1;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -185,6 +193,9 @@ public class AutoFlowLayout extends LinearLayout  {
         int top = getPaddingTop();
         // 得到总行数
         int lineNums = mAllViews.size();
+        if (mAllViews.get(mAllViews.size()-1).size() == 0){
+            lineNums = mAllViews.size()-1;
+        }
         for (int i = 0; i < lineNums; i++) {
             // 每一行的所有的views
             lineViews = mAllViews.get(i);
@@ -192,10 +203,20 @@ public class AutoFlowLayout extends LinearLayout  {
             lineHeight = mLineHeight.get(i);
             // 遍历当前行所有的View
             for (int j = 0; j < lineViews.size(); j++) {
-                View child = lineViews.get(j);
+                final View child = lineViews.get(j);
+                mCurrentItemIndex++;
                 if (child.getVisibility() == View.GONE) {
                     continue;
                 }
+                if (child.getTag()==null){
+                    child.setTag(mCurrentItemIndex);
+                }
+                child.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
+                    }
+                });
                 MarginLayoutParams lp = (MarginLayoutParams) child
                         .getLayoutParams();
 
@@ -205,8 +226,6 @@ public class AutoFlowLayout extends LinearLayout  {
                 int rc = lc + child.getMeasuredWidth();
                 int bc = tc + child.getMeasuredHeight();
 
-                Log.e("SingleLineLinerLayout", child + " , l = " + lc + " , t = " + t + " , r ="
-                        + rc + " , b = " + bc);
 
                 child.layout(lc, tc, rc, bc);
 
@@ -277,6 +296,13 @@ public class AutoFlowLayout extends LinearLayout  {
      */
     public boolean hasMoreData() {
         return mHasMoreData;
+    }
+
+    public interface OnItemClickListener{
+        void onItemClick(int position,View view);
+    }
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        mOnItemClickListener = onItemClickListener;
     }
 
 }
