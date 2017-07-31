@@ -2,6 +2,7 @@ package com.example.lvruheng.autoflowlayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +47,23 @@ public class AutoFlowLayout extends LinearLayout  {
      * 当前view的索引
      */
     private int  mCurrentItemIndex=-1;
+    /**
+     * 多选标志，默认支持单选
+     */
+    private boolean mIsMultiChecked;
+    /**
+     * 设置View的选中/未选中背景色或者单纯的背景色
+     */
+    private Drawable mViewBgDrawable;
+    /**
+     * 记录选中的View
+     */
+    private View mSelectedView;
+
+    /**
+     *记录选中的View
+     */
+    private List<View> mCheckedViews  = new ArrayList<>();
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -63,7 +81,9 @@ public class AutoFlowLayout extends LinearLayout  {
         TypedArray ta = context.obtainStyledAttributes(attrs,R.styleable.AutoFlowLayout);
         mIsSingleLine = ta.getBoolean(R.styleable.AutoFlowLayout_singleLine,false);
         mMaxLineNumbers = ta.getInteger(R.styleable.AutoFlowLayout_maxLines,Integer.MAX_VALUE);
+        mIsMultiChecked = ta.getBoolean(R.styleable.AutoFlowLayout_multiChecked,false);
         ta.recycle();
+        setOrientation(HORIZONTAL);
     }
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -214,7 +234,20 @@ public class AutoFlowLayout extends LinearLayout  {
                 child.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
+                        if (mIsMultiChecked) {
+                            view.setSelected(true);
+                            mCheckedViews.add(view);
+                            mSelectedView = view;
+                        } else {
+                            if (mSelectedView != null) {
+                                mSelectedView.setSelected(false);
+                            }
+                            view.setSelected(true);
+                            mSelectedView = view;
+                        }
+                        if (mOnItemClickListener != null) {
+                            mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
+                        }
                     }
                 });
                 MarginLayoutParams lp = (MarginLayoutParams) child
@@ -254,7 +287,11 @@ public class AutoFlowLayout extends LinearLayout  {
             return;
         }
         for (int i = 0; i < views.size(); i++) {
-            addView(views.get(i));
+            View view = views.get(i);
+            if (mViewBgDrawable != null) {
+                view.setBackgroundDrawable(mViewBgDrawable);
+            }
+            addView(view);
         }
     }
 
@@ -298,11 +335,51 @@ public class AutoFlowLayout extends LinearLayout  {
         return mHasMoreData;
     }
 
+    /**
+     * 是否支持多选
+     * @return
+     */
+    public boolean isMultiChecked() {
+        return mIsMultiChecked;
+    }
+    public void setMultiChecked(boolean isMultiChecked) {
+        mIsMultiChecked = isMultiChecked;
+    }
+    /**
+     * 设置选择背景
+     * @param drawable  selector 设置选中与未选中的背景或者单纯的背景色
+     */
+    public void setCheckedBackgorud(Drawable drawable) {
+        mViewBgDrawable = drawable;
+    }
+
+    /**
+     * 获得选中的View集合
+     * @return view集合
+     */
+    public List<View> getCheckedViews() {
+        if (mIsMultiChecked) {
+            return mCheckedViews;
+        } else {
+            mCheckedViews.add(mSelectedView);
+            return mCheckedViews;
+        }
+    }
+
+    /**
+     * 获取上一个被选中的View
+     * @return 被选中的view
+     */
+    public View  getSelectedView() {
+        return  mSelectedView;
+    }
     public interface OnItemClickListener{
         void onItemClick(int position,View view);
     }
     public void setOnItemClickListener(OnItemClickListener onItemClickListener){
         mOnItemClickListener = onItemClickListener;
     }
+
+
 
 }
