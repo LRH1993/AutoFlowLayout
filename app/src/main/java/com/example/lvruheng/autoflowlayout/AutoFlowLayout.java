@@ -238,15 +238,24 @@ public class AutoFlowLayout extends LinearLayout  {
                     @Override
                     public void onClick(View view) {
                         if (mIsMultiChecked) {
-                            view.setSelected(true);
-                            mCheckedViews.add(view);
-                            mSelectedView = view;
-                        } else {
-                            if (mSelectedView != null) {
-                                mSelectedView.setSelected(false);
+                            if (mCheckedViews.contains(view)) {
+                                mCheckedViews.remove(view);
+                                view.setSelected(false);
+                            } else {
+                                view.setSelected(true);
+                                mCheckedViews.add(view);
+                                mSelectedView = view;
                             }
-                            view.setSelected(true);
-                            mSelectedView = view;
+                        } else {
+                            if (view.isSelected()) {
+                                view.setSelected(false);
+                            } else {
+                                if (mSelectedView != null) {
+                                    mSelectedView.setSelected(false);
+                                }
+                                view.setSelected(true);
+                                mSelectedView = view;
+                            }
                         }
                         if (mOnItemClickListener != null) {
                             mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
@@ -298,18 +307,6 @@ public class AutoFlowLayout extends LinearLayout  {
         }
         requestLayout();
     }
-
-    /**
-     * 添加子view
-      * @param view
-     */
-    public void addView(View view) {
-        if (view != null) {
-            addView(view);
-        }
-        requestLayout();
-    }
-
     /**
      * 删除指定索引的view
      * @param index true删除成功 false删除失败
