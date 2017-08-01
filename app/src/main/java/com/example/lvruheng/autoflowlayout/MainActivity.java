@@ -18,13 +18,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mFlowLayout = (AutoFlowLayout) findViewById(R.id.afl_cotent);
         mLayoutInflater = LayoutInflater.from(this);
-        for(int i = 0; i<mData.length; i++){
-            View item = mLayoutInflater.inflate(R.layout.sub_item, null);
-            TextView tvAttrTag = (TextView) item.findViewById(R.id.tv_attr_tag);
-            tvAttrTag.setText(mData[i]);
-            final String content = mData[i];
-            mFlowLayout.addView(item);
-        }
+        mFlowLayout.setAdapter(new FlowAdapter(mData) {
+            @Override
+            public View getView(int position) {
+                View item = mLayoutInflater.inflate(R.layout.sub_item, null);
+                TextView tvAttrTag = (TextView) item.findViewById(R.id.tv_attr_tag);
+                tvAttrTag.setText(mData[position]);
+                return item;
+            }
+        });
         mFlowLayout.setOnItemClickListener(new AutoFlowLayout.OnItemClickListener() {
             @Override
             public void onItemClick(int position,View view) {

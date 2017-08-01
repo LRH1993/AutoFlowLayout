@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.List;
 /**
  *自定义LinearLayout，支持自动换行，指定行数,实现流式布局
  */
-public class AutoFlowLayout extends LinearLayout  {
+public class AutoFlowLayout <T> extends LinearLayout  {
     /**
      * 存储所有的View，按行记录
      */
@@ -67,6 +66,11 @@ public class AutoFlowLayout extends LinearLayout  {
      * 记录展示的数量
      */
     private int mDisplayNumbers;
+    /**
+     * 数据适配器
+     */
+    private FlowAdapter<T> mAdapter;
+
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -91,6 +95,16 @@ public class AutoFlowLayout extends LinearLayout  {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setFlowMesure(widthMeasureSpec,heightMeasureSpec);
+
+    }
+
+    /**
+     * 流式布局的测量模式
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
+    private void setFlowMesure(int widthMeasureSpec, int heightMeasureSpec) {
         // 获得它的父容器为它设置的测量模式和大小
         int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
         int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -164,6 +178,13 @@ public class AutoFlowLayout extends LinearLayout  {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        setFlowLayout();
+    }
+
+    /**
+     * 流式布局的布局模式
+     */
+    private void setFlowLayout() {
         mAllViews.clear();
         mLineHeight.clear();
 
@@ -437,6 +458,22 @@ public class AutoFlowLayout extends LinearLayout  {
     public View  getSelectedView() {
         return  mSelectedView;
     }
+
+    /**
+     * 设置数据适配器
+     * @param adapter
+     */
+    public  void setAdapter(FlowAdapter<T> adapter) {
+        mAdapter = adapter;
+        if (mAdapter.getCount() != 0) {
+            for (int i = 0; i < mAdapter.getCount(); i ++) {
+                View view = mAdapter.getView(i);
+                addView(view);
+            }
+            requestLayout();
+        }
+    }
+
     public interface OnItemClickListener{
         void onItemClick(int position,View view);
     }
