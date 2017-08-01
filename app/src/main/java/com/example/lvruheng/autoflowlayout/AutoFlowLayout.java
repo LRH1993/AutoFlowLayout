@@ -70,6 +70,26 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 数据适配器
      */
     private FlowAdapter<T> mAdapter;
+    /**
+     * 水平方向View之间的间距
+     */
+    private int  mHorizontalSpace;
+    /**
+     * 竖直方向View之间的间距
+     */
+    private int mVerticalSpace;
+    /**
+     * 列数
+     */
+    private int mColumnNumbers;
+    /**
+     * 行数
+     */
+    private int mRowNumbers;
+    /**
+     * 是否设置了网格布局
+     */
+    private boolean mIsGridMode;
 
     public AutoFlowLayout(Context context) {
         super(context);
@@ -89,14 +109,92 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mIsSingleLine = ta.getBoolean(R.styleable.AutoFlowLayout_singleLine,false);
         mMaxLineNumbers = ta.getInteger(R.styleable.AutoFlowLayout_maxLines,Integer.MAX_VALUE);
         mIsMultiChecked = ta.getBoolean(R.styleable.AutoFlowLayout_multiChecked,false);
+        mHorizontalSpace = ta.getInteger(R.styleable.AutoFlowLayout_horizontalSpace,0);
+        mVerticalSpace = ta.getInteger(R.styleable.AutoFlowLayout_verticalSpace,0);
+        mColumnNumbers = ta.getInteger(R.styleable.AutoFlowLayout_columnNumbers,0);
+        mRowNumbers = ta.getInteger(R.styleable.AutoFlowLayout_rowNumbers,0);
+        if (mColumnNumbers != 0) {
+            mIsGridMode = true;
+        }
         ta.recycle();
         setOrientation(HORIZONTAL);
     }
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setFlowMesure(widthMeasureSpec,heightMeasureSpec);
+        if (mIsGridMode) {
+            setGridMeasure(widthMeasureSpec,heightMeasureSpec);
+        } else {
+            setFlowMeasure(widthMeasureSpec,heightMeasureSpec);
+        }
 
+
+    }
+
+    /**
+     * 网格布局的测量模式 默认各个子VIEW宽高值相同
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
+    private void setGridMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // 获得它的父容器为它设置的测量模式和大小
+        int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int modeWidth = MeasureSpec.getMode(widthMeasureSpec);
+        int modeHeight = MeasureSpec.getMode(heightMeasureSpec);
+        //获取viewgroup的padding
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        //超宽/超高纪录的最后值
+        int lastHeight;
+        int lastWidth;
+        //最终的宽高值
+        int heightResult;
+        int widthResult;
+        //未设置行数 推测行数
+        if (mRowNumbers == 0) {
+            mRowNumbers = getChildCount()/mColumnNumbers == 0 ?
+                    getChildCount()/mColumnNumbers : (getChildCount()/mColumnNumbers + 1);
+        }
+        int maxChildHeight = 0;
+        int maxWidth = 0;
+        int maxHeight = 0;
+        //统计最大高度/最大宽度
+        for (int i = 0; i <  mRowNumbers; i++) {
+            for (int j = 0; j < mColumnNumbers; j++) {
+                final View child = getChildAt(i * mColumnNumbers + j);
+                if (child != null) {
+                    if (child.getVisibility() != GONE) {
+                        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                        final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec, 0, lp.width);
+                        final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, 0, lp.height);
+                        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                        maxWidth +=child.getMeasuredWidth();
+                        maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight());
+                    }
+                }
+            }
+            maxHeight += maxChildHeight;
+            maxChildHeight = 0;
+        }
+        int tempWidth = maxWidth+mHorizontalSpace*(mColumnNumbers-1)+paddingLeft+paddingRight;
+        int tempHeight = maxHeight+mVerticalSpace*(mRowNumbers-1)+paddingBottom+paddingTop;
+        if (tempWidth > sizeWidth) {
+            widthResult = sizeWidth;
+        } else {
+            widthResult = tempWidth;
+        }
+        //宽高超过屏幕大小，则进行压缩存放
+        if (tempHeight > sizeHeight) {
+            heightResult = sizeHeight;
+        } else {
+            heightResult = tempHeight;
+        }
+        setMeasuredDimension((modeWidth == MeasureSpec.EXACTLY) ? sizeWidth
+                : widthResult, (modeHeight == MeasureSpec.EXACTLY) ? sizeHeight
+                : heightResult);
     }
 
     /**
@@ -104,7 +202,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * @param widthMeasureSpec
      * @param heightMeasureSpec
      */
-    private void setFlowMesure(int widthMeasureSpec, int heightMeasureSpec) {
+    private void setFlowMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // 获得它的父容器为它设置的测量模式和大小
         int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
         int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -178,7 +276,18 @@ public class AutoFlowLayout <T> extends LinearLayout  {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        setFlowLayout();
+        if (mIsGridMode) {
+           setGridLayout();
+        } else {
+            setFlowLayout();
+        }
+    }
+
+    /**
+     * 网格布局的布局模式
+     */
+    private void setGridLayout() {
+
     }
 
     /**
@@ -473,6 +582,72 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             requestLayout();
         }
     }
+
+    /**
+     * 设置网格布局的水平间距
+     * @param horizontalSpace 单位px
+     */
+    public void setHorizontalSpace(int horizontalSpace) {
+        mHorizontalSpace = horizontalSpace;
+        requestLayout();
+    }
+
+    /**
+     * 返回网格布局的水平距离
+     * @return
+     */
+    public int getHorizontalSpace() {
+        return mHorizontalSpace;
+    }
+
+    /**
+     * 设置网格布局的垂直间距
+     * @param verticalSpace 单位px
+     */
+    public void setVerticalSpace(int verticalSpace) {
+        mVerticalSpace = verticalSpace;
+        requestLayout();
+    }
+
+    /**
+     * 返回网格布局的垂直距离
+     */
+    public int getVerticalSpace() {
+        return mVerticalSpace;
+    }
+
+    /**
+     * 设置列数
+     * @param columnNumbers
+     */
+    public void setColumnNumbers(int columnNumbers) {
+        mColumnNumbers = columnNumbers;
+    }
+
+    /**
+     * 获得列数
+     * @return
+     */
+    public int getColumnNumbers() {
+        return mColumnNumbers;
+    }
+
+    /**
+     * 设置行数
+     * @param rowNumbers
+     */
+    public void setRowNumbers(int rowNumbers) {
+        mRowNumbers = rowNumbers;
+    }
+
+    /**
+     * 得到行数
+     * @return
+     */
+    public int getRowNumbers() {
+        return mRowNumbers;
+    }
+
 
     public interface OnItemClickListener{
         void onItemClick(int position,View view);
