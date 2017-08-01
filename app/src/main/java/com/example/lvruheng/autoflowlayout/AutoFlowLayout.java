@@ -59,11 +59,14 @@ public class AutoFlowLayout extends LinearLayout  {
      * 记录选中的View
      */
     private View mSelectedView;
-
     /**
      *记录选中的View
      */
     private List<View> mCheckedViews  = new ArrayList<>();
+    /**
+     * 记录展示的数量
+     */
+    private int mDisplayNumbers;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -293,6 +296,70 @@ public class AutoFlowLayout extends LinearLayout  {
             }
             addView(view);
         }
+        requestLayout();
+    }
+
+    /**
+     * 添加子view
+      * @param view
+     */
+    public void addView(View view) {
+        if (view != null) {
+            addView(view);
+        }
+        requestLayout();
+    }
+
+    /**
+     * 删除指定索引的view
+     * @param index true删除成功 false删除失败
+     * @return
+     */
+    public boolean deleteView(int index) {
+        if (mCurrentItemIndex != 0) {
+            mDisplayNumbers = mCurrentItemIndex/2;
+            if (index > mDisplayNumbers) {
+               return  false;
+            } else {
+                removeViewAt(index);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 删除最后一个view
+     * @return  true删除成功 false删除失败
+     */
+    public boolean deleteView() {
+        if (mCurrentItemIndex != 0) {
+            mDisplayNumbers = mCurrentItemIndex/2;
+            removeViewAt(mDisplayNumbers);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 删除指定范围的所有view
+     * @param start 开始范围
+     * @param end   结束范围
+     * @return
+     */
+    public boolean deleteView(int start, int end) {
+        if (mCurrentItemIndex != 0) {
+            mDisplayNumbers = mCurrentItemIndex/2;
+            if (start < 0) {
+                start = 0;
+            }
+            if (end > mDisplayNumbers) {
+                end = mDisplayNumbers;
+            }
+            removeViews(start,end-start+1);
+            return true;
+        }
+        return false;
     }
 
     /**
