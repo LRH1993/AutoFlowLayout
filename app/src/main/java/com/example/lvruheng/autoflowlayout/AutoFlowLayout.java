@@ -287,7 +287,23 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 网格布局的布局模式
      */
     private void setGridLayout() {
-
+        int sizeWidth = getWidth();
+        int sizeHeight = getHeight();
+        //子View的平均宽高
+        int childAvWidth = (sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers;
+        int childAvHeight = (sizeHeight - getPaddingTop() - getPaddingBottom() - mVerticalSpace * (mRowNumbers-1))/mRowNumbers;
+        for (int i = 0; i < mRowNumbers; i++) {
+            for (int j = 0; j < mColumnNumbers; j++) {
+                final View child = getChildAt(i * mColumnNumbers + j);
+                if (child != null) {
+                    if (child.getVisibility() != View.GONE) {
+                        int childLeft = getPaddingLeft() + j * (childAvWidth + mHorizontalSpace);
+                        int childTop = getPaddingTop() + i * (childAvHeight + mVerticalSpace);
+                        child.layout(childLeft, childTop, childLeft + childAvWidth, childAvHeight +childTop);
+                    }
+                }
+            }
+        }
     }
 
     /**

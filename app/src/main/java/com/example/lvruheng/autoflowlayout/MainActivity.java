@@ -22,8 +22,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public View getView(int position) {
                 View item = mLayoutInflater.inflate(R.layout.sub_item, null);
-                TextView tvAttrTag = (TextView) item.findViewById(R.id.tv_attr_tag);
-                tvAttrTag.setText(mData[position]);
+//                TextView tvAttrTag = (TextView) item.findViewById(R.id.tv_attr_tag);
+//                tvAttrTag.setText(mData[position]);
                 return item;
             }
         });
