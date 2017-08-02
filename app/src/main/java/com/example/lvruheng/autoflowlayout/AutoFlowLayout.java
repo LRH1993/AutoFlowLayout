@@ -296,7 +296,9 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             for (int j = 0; j < mColumnNumbers; j++) {
                 final View child = getChildAt(i * mColumnNumbers + j);
                 if (child != null) {
+                    mCurrentItemIndex++;
                     if (child.getVisibility() != View.GONE) {
+                        setChildClickOperation(child);
                         int childLeft = getPaddingLeft() + j * (childAvWidth + mHorizontalSpace);
                         int childTop = getPaddingTop() + i * (childAvHeight + mVerticalSpace);
                         child.layout(childLeft, childTop, childLeft + childAvWidth, childAvHeight +childTop);
@@ -377,37 +379,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 if (child.getVisibility() == View.GONE) {
                     continue;
                 }
-                if (child.getTag()==null){
-                    child.setTag(mCurrentItemIndex);
-                }
-                child.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (mIsMultiChecked) {
-                            if (mCheckedViews.contains(view)) {
-                                mCheckedViews.remove(view);
-                                view.setSelected(false);
-                            } else {
-                                view.setSelected(true);
-                                mCheckedViews.add(view);
-                                mSelectedView = view;
-                            }
-                        } else {
-                            if (view.isSelected()) {
-                                view.setSelected(false);
-                            } else {
-                                if (mSelectedView != null) {
-                                    mSelectedView.setSelected(false);
-                                }
-                                view.setSelected(true);
-                                mSelectedView = view;
-                            }
-                        }
-                        if (mOnItemClickListener != null) {
-                            mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
-                        }
-                    }
-                });
+                setChildClickOperation(child);
                 MarginLayoutParams lp = (MarginLayoutParams) child
                         .getLayoutParams();
 
@@ -426,6 +398,44 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             left = getPaddingLeft();
             top += lineHeight;
         }
+    }
+
+    /**
+     * 执行子View的点击相关事件
+     * @param child
+     */
+    private void setChildClickOperation(View child) {
+        if (child.getTag()==null){
+            child.setTag(mCurrentItemIndex);
+        }
+        child.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mIsMultiChecked) {
+                    if (mCheckedViews.contains(view)) {
+                        mCheckedViews.remove(view);
+                        view.setSelected(false);
+                    } else {
+                        view.setSelected(true);
+                        mCheckedViews.add(view);
+                        mSelectedView = view;
+                    }
+                } else {
+                    if (view.isSelected()) {
+                        view.setSelected(false);
+                    } else {
+                        if (mSelectedView != null) {
+                            mSelectedView.setSelected(false);
+                        }
+                        view.setSelected(true);
+                        mSelectedView = view;
+                    }
+                }
+                if (mOnItemClickListener != null) {
+                    mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
+                }
+            }
+        });
     }
 
     /**
