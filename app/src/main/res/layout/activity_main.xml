@@ -9,6 +9,7 @@
         android:id="@+id/afl_cotent"
         app:columnNumbers="3"
         app:rowNumbers="3"
+        app:cutLine="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </RelativeLayout>

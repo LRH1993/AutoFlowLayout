@@ -75,11 +75,11 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     /**
      * 水平方向View之间的间距
      */
-    private int  mHorizontalSpace;
+    private float mHorizontalSpace;
     /**
      * 竖直方向View之间的间距
      */
-    private int mVerticalSpace;
+    private float mVerticalSpace;
     /**
      * 列数
      */
@@ -122,8 +122,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mIsSingleLine = ta.getBoolean(R.styleable.AutoFlowLayout_singleLine,false);
         mMaxLineNumbers = ta.getInteger(R.styleable.AutoFlowLayout_maxLines,Integer.MAX_VALUE);
         mIsMultiChecked = ta.getBoolean(R.styleable.AutoFlowLayout_multiChecked,false);
-        mHorizontalSpace = ta.getInteger(R.styleable.AutoFlowLayout_horizontalSpace,0);
-        mVerticalSpace = ta.getInteger(R.styleable.AutoFlowLayout_verticalSpace,0);
+        mHorizontalSpace = ta.getDimension(R.styleable.AutoFlowLayout_horizontalSpace,0);
+        mVerticalSpace = ta.getDimension(R.styleable.AutoFlowLayout_verticalSpace,0);
         mColumnNumbers = ta.getInteger(R.styleable.AutoFlowLayout_columnNumbers,0);
         mRowNumbers = ta.getInteger(R.styleable.AutoFlowLayout_rowNumbers,0);
         mCutLineColor = ta.getColor(R.styleable.AutoFlowLayout_cutLineColor,getResources().getColor(android.R.color.darker_gray));
@@ -195,8 +195,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             maxHeight += maxChildHeight;
             maxChildHeight = 0;
         }
-        int tempWidth = maxWidth+mHorizontalSpace*(mColumnNumbers-1)+paddingLeft+paddingRight;
-        int tempHeight = maxHeight+mVerticalSpace*(mRowNumbers-1)+paddingBottom+paddingTop;
+        int tempWidth = (int) (maxWidth+mHorizontalSpace*(mColumnNumbers-1)+paddingLeft+paddingRight);
+        int tempHeight = (int) (maxHeight+mVerticalSpace*(mRowNumbers-1)+paddingBottom+paddingTop);
         if (tempWidth > sizeWidth) {
             widthResult = sizeWidth;
         } else {
@@ -306,8 +306,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         int sizeWidth = getWidth();
         int sizeHeight = getHeight();
         //子View的平均宽高
-        int childAvWidth = (sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers;
-        int childAvHeight = (sizeHeight - getPaddingTop() - getPaddingBottom() - mVerticalSpace * (mRowNumbers-1))/mRowNumbers;
+        int childAvWidth = (int) ((sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers);
+        int childAvHeight = (int) ((sizeHeight - getPaddingTop() - getPaddingBottom() - mVerticalSpace * (mRowNumbers-1))/mRowNumbers);
         for (int i = 0; i < mRowNumbers; i++) {
             for (int j = 0; j < mColumnNumbers; j++) {
                 final View child = getChildAt(i * mColumnNumbers + j);
@@ -315,8 +315,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                     mCurrentItemIndex++;
                     if (child.getVisibility() != View.GONE) {
                         setChildClickOperation(child);
-                        int childLeft = getPaddingLeft() + j * (childAvWidth + mHorizontalSpace);
-                        int childTop = getPaddingTop() + i * (childAvHeight + mVerticalSpace);
+                        int childLeft = (int) (getPaddingLeft() + j * (childAvWidth + mHorizontalSpace));
+                        int childTop = (int) (getPaddingTop() + i * (childAvHeight + mVerticalSpace));
                         child.layout(childLeft, childTop, childLeft + childAvWidth, childAvHeight +childTop);
                     }
                 }
@@ -466,7 +466,36 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             linePaint.setStyle(Paint.Style.STROKE);
             linePaint.setStrokeWidth(mCutLineWidth);
             linePaint.setColor(mCutLineColor);
+            for (int i = 0; i < mRowNumbers; i++) {
+                for (int j = 0; j < mColumnNumbers; j++) {
+                    View child = getChildAt(i * mColumnNumbers + j);
+                    //最后一列
+                    if (j == mColumnNumbers-1) {
+                        //不是最后一行  只画底部
+                        if (i != mRowNumbers-1){
+                            View nextChild = getChildAt(i * mColumnNumbers + j+mColumnNumbers);
+                            canvas.drawLine(child.getLeft(),(child.getBottom()+nextChild.getTop())/2,
+                                    child.getRight(),(child.getBottom()+nextChild.getTop())/2,linePaint);
+                        }
+                    } else {
+                        //最后一行 只画右部
+                        if (i ==  mRowNumbers -1) {
+                            View nextChild = getChildAt(i * mColumnNumbers + j + 1);
+                            canvas.drawLine((child.getRight()+nextChild.getLeft())/2, child.getTop(),
+                                    (child.getRight()+nextChild.getLeft())/2,child.getBottom(),linePaint);
+                        } else {
+                            //底部 右部 都画
+                            View  rightChild = getChildAt(i * mColumnNumbers + j + 1);
+                            View  bottomChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
+                            canvas.drawLine((child.getRight()+rightChild.getLeft())/2, child.getTop(),
+                                    (child.getRight()+rightChild.getLeft())/2,child.getBottom(),linePaint);
+                            canvas.drawLine(child.getLeft(),(child.getBottom()+bottomChild.getTop())/2,
+                                    child.getRight(),(child.getBottom()+bottomChild.getTop())/2,linePaint);
+                        }
 
+                    }
+                }
+            }
 
         }
     }
@@ -655,7 +684,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 返回网格布局的水平距离
      * @return
      */
-    public int getHorizontalSpace() {
+    public float getHorizontalSpace() {
         return mHorizontalSpace;
     }
 
@@ -670,7 +699,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     /**
      * 返回网格布局的垂直距离
      */
-    public int getVerticalSpace() {
+    public float getVerticalSpace() {
         return mVerticalSpace;
     }
 
@@ -712,6 +741,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public void setCutLineWidth (float width) {
         mCutLineWidth = width;
+        invalidate();
     }
 
     /**
@@ -728,6 +758,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public void setCutLineColor (int color) {
         mCutLineColor = color;
+        invalidate();
     }
 
     /**
@@ -744,6 +775,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public void setCutLine(boolean isCutLine) {
         mIsCutLine = isCutLine;
+        invalidate();
     }
 
     /**
