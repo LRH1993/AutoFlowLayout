@@ -20,6 +20,10 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     private List<List<View>> mAllViews = new ArrayList<List<View>>();
     /**
+     * 记录每一行的宽度
+     */
+    private List<Integer> mWidthList = new ArrayList<>();
+    /**
      * 记录设置单行显示的标志
      */
     private boolean mIsSingleLine;
@@ -104,6 +108,10 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      *记录分割线的长度
      */
     private int mCutLineColor;
+    /**
+     * 是否每行居中处理
+     */
+    private boolean mIsCenter;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -129,6 +137,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mCutLineColor = ta.getColor(R.styleable.AutoFlowLayout_cutLineColor,getResources().getColor(android.R.color.darker_gray));
         mCutLineWidth = ta.getDimension(R.styleable.AutoFlowLayout_cutLineWidth,1f);
         mIsCutLine = ta.getBoolean(R.styleable.AutoFlowLayout_cutLine,false);
+        mIsCenter = ta.getBoolean(R.styleable.AutoFlowLayout_lineCenter,false);
         if (mColumnNumbers != 0) {
             mIsGridMode = true;
         }
@@ -352,6 +361,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 mLineHeight.add(lineHeight);
                 // 将当前行的childView保存，然后开启新的ArrayList保存下一行的childView
                 mAllViews.add(lineViews);
+                mWidthList.add(lp.leftMargin + lp.rightMargin + getPaddingRight() + lineWidth);
                 lineWidth = 0;// 重置行宽
                 lineViews = new ArrayList<View>();
                 mCount++;
@@ -375,7 +385,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         // 记录最后一行
         mLineHeight.add(lineHeight);
         mAllViews.add(lineViews);
-
+        mWidthList.add(lineWidth);
         int left = getPaddingLeft();
         int top = getPaddingTop();
         // 得到总行数
@@ -388,6 +398,11 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             lineViews = mAllViews.get(i);
             // 当前行的最大高度
             lineHeight = mLineHeight.get(i);
+            if (mIsCenter) {
+                if (mWidthList.get(i)<getWidth()) {
+                    left +=(getWidth()-mWidthList.get(i))/2;
+                }
+            }
             // 遍历当前行所有的View
             for (int j = 0; j < lineViews.size(); j++) {
                 final View child = lineViews.get(j);
@@ -803,6 +818,22 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public boolean hasCutLine() {
         return mIsCutLine;
+    }
+
+    /**
+     * 设置是否进行行居中显示
+     * @param isCenter
+     */
+    public void setLineCenter(boolean isCenter) {
+        mIsCenter = isCenter;
+    }
+
+    /**
+     * 是否设置了行居中显示
+     * @return
+     */
+    public boolean isLineCenter() {
+        return mIsCenter;
     }
 
     public interface OnItemClickListener{

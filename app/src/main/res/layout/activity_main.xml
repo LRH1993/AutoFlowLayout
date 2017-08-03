@@ -7,9 +7,7 @@
 
     <com.example.lvruheng.autoflowlayout.AutoFlowLayout
         android:id="@+id/afl_cotent"
-        app:columnNumbers="3"
-        app:rowNumbers="3"
-        app:cutLine="true"
+        app:lineCenter = "true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </RelativeLayout>
