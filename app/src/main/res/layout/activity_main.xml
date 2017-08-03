@@ -7,7 +7,7 @@
 
     <com.example.lvruheng.autoflowlayout.AutoFlowLayout
         android:id="@+id/afl_cotent"
-        app:lineCenter = "true"
+        app:closeMode = "true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </RelativeLayout>

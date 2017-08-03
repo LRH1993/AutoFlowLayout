@@ -9,7 +9,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *自定义LinearLayout，支持自动换行，指定行数,实现流式布局
@@ -23,6 +26,14 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 记录每一行的宽度
      */
     private List<Integer> mWidthList = new ArrayList<>();
+    /**
+     * 紧密模式下的所有View
+     */
+    private List<HashMap<Integer,View>> mCloseViews = new ArrayList<>();
+    /**
+     * 处于紧密模式下的View数量
+     */
+    private int mCloseCount;
     /**
      * 记录设置单行显示的标志
      */
@@ -112,6 +123,10 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 是否每行居中处理
      */
     private boolean mIsCenter;
+    /**
+     * 是否处于紧密模式
+     */
+    private boolean mIsCloseMode;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -138,6 +153,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mCutLineWidth = ta.getDimension(R.styleable.AutoFlowLayout_cutLineWidth,1f);
         mIsCutLine = ta.getBoolean(R.styleable.AutoFlowLayout_cutLine,false);
         mIsCenter = ta.getBoolean(R.styleable.AutoFlowLayout_lineCenter,false);
+        mIsCloseMode = ta.getBoolean(R.styleable.AutoFlowLayout_closeMode,false);
         if (mColumnNumbers != 0) {
             mIsGridMode = true;
         }
@@ -149,6 +165,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (mIsGridMode) {
             setGridMeasure(widthMeasureSpec,heightMeasureSpec);
+        } else if (mIsCloseMode) {
+            setCloseFlowMeasure(widthMeasureSpec,heightMeasureSpec);
         } else {
             setFlowMeasure(widthMeasureSpec,heightMeasureSpec);
         }
@@ -172,9 +190,6 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         int paddingRight = getPaddingRight();
         int paddingTop = getPaddingTop();
         int paddingBottom = getPaddingBottom();
-        //超宽/超高纪录的最后值
-        int lastHeight;
-        int lastWidth;
         //最终的宽高值
         int heightResult;
         int widthResult;
@@ -223,6 +238,86 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     }
 
     /**
+     * 紧密模式下的测量
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
+    private void setCloseFlowMeasure(int widthMeasureSpec, int heightMeasureSpec){
+        // 获得它的父容器为它设置的测量模式和大小
+        int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int modeWidth = MeasureSpec.getMode(widthMeasureSpec);
+        int modeHeight = MeasureSpec.getMode(heightMeasureSpec);
+        // 如果是warp_content情况下，记录宽和高
+        int width = 0;
+        int height = getPaddingBottom() + getPaddingTop();
+
+
+        int cCount = getChildCount();
+        int lineNums = 0;
+        while (mCloseCount < cCount) {
+            if (lineNums>=mMaxLineNumbers) {
+                setHasMoreData(mCloseCount,cCount);
+                break;
+            }
+            if (mIsSingleLine && lineNums >= 1) {
+                setHasMoreData(mCloseCount,cCount);
+                break;
+            }
+            /**
+             * 记录每一行的宽度，width不断取最大宽度
+             */
+            int lineWidth = getPaddingLeft() + getPaddingRight();
+            /**
+             * 每一行的高度，累加至height
+             */
+            int lineHeight = 0;
+            HashMap<Integer,View> lineMap = new HashMap<>();
+            // 遍历每个子元素
+            for (int i = 0; i < cCount; i++) {
+                View child = getChildAt(i);
+                if (child.getTag() != null && (boolean)child.getTag()) {
+                    continue;
+                }
+                // 测量每一个child的宽和高
+                measureChild(child, widthMeasureSpec, heightMeasureSpec);
+                // 得到child的lp
+                MarginLayoutParams lp = (MarginLayoutParams) child
+                        .getLayoutParams();
+                // 当前子空间实际占据的宽度
+                int childWidth = child.getMeasuredWidth() + lp.leftMargin
+                        + lp.rightMargin;
+                // 当前子空间实际占据的高度
+                int childHeight = child.getMeasuredHeight() + lp.topMargin
+                        + lp.bottomMargin;
+                /**
+                 * 如果加入当前child，则超出最大宽度，则的到目前最大宽度给width，累加height 然后开启新行
+                 */
+                if (lineWidth + childWidth <= sizeWidth) {
+                    //累加值lineWidth,lineHeight取最大高度
+                    lineWidth += childWidth;
+                    lineHeight = Math.max(lineHeight, childHeight);
+                    lineMap.put(i, child);
+                    child.setTag(true);
+                    mCloseCount++;
+                }
+                // 如果是最后一个，则将当前记录的最大宽度和当前lineWidth做比较
+                if (i == cCount - 1) {
+                    width = Math.max(width, lineWidth);
+                    height += lineHeight;
+                    mWidthList.add(lineWidth);
+                    mLineHeight.add(lineHeight);
+                    mCloseViews.add(lineMap);
+                    lineNums++;
+                }
+            }
+        }
+        setMeasuredDimension((modeWidth == MeasureSpec.EXACTLY) ? sizeWidth
+                : width, (modeHeight == MeasureSpec.EXACTLY) ? sizeHeight
+                : height);
+    }
+
+    /**
      * 流式布局的测量模式
      * @param widthMeasureSpec
      * @param heightMeasureSpec
@@ -235,7 +330,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         int modeHeight = MeasureSpec.getMode(heightMeasureSpec);
         // 如果是warp_content情况下，记录宽和高
         int width = 0;
-        int height = 0;
+        int height = getPaddingTop() + getPaddingBottom();
         /**
          * 记录每一行的宽度，width不断取最大宽度
          */
@@ -243,7 +338,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         /**
          * 每一行的高度，累加至height
          */
-        int lineHeight = getPaddingTop() + getPaddingBottom();
+        int lineHeight = 0;
 
         int cCount = getChildCount();
 
@@ -303,8 +398,63 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if (mIsGridMode) {
            setGridLayout();
+        } else if (mIsCloseMode) {
+            setCloseFlowLayout();
         } else {
             setFlowLayout();
+        }
+    }
+
+    /**
+     * 紧密模式下的流式布局
+     */
+    private void setCloseFlowLayout() {
+        int left = getPaddingLeft();
+        int top = getPaddingTop();
+        // 得到总行数
+        int lineNums = mCloseViews.size();
+        if (mCloseViews.get(mCloseViews.size()-1).size() == 0){
+            lineNums = mCloseViews.size()-1;
+        }
+        int lineHeight = 0;
+        // 存储每一行所有的childView
+        HashMap<Integer,View> lineViews = new HashMap<>();
+        for (int i = 0; i < lineNums; i++) {
+            // 每一行的所有的views
+            lineViews = mCloseViews.get(i);
+            // 当前行的最大高度
+            lineHeight = mLineHeight.get(i);
+            if (mIsCenter) {
+                if (mWidthList.get(i)<getWidth()) {
+                    left +=(getWidth()-mWidthList.get(i))/2;
+                }
+            }
+            // 遍历当前行所有的View
+            Set<Map.Entry<Integer, View>> entrySet = lineViews.entrySet();
+            for (Map.Entry<Integer, View> entry:entrySet) {
+                final View child = entry.getValue();
+                mCurrentItemIndex++;
+                if (child.getVisibility() == View.GONE) {
+                    continue;
+                }
+                setChildClickOperation(child,entry.getKey());
+                MarginLayoutParams lp = (MarginLayoutParams) child
+                        .getLayoutParams();
+
+                //计算childView的left,top,right,bottom
+                int lc = left + lp.leftMargin;
+                int tc = top + lp.topMargin;
+                int rc = lc + child.getMeasuredWidth();
+                int bc = tc + child.getMeasuredHeight();
+
+
+                child.layout(lc, tc, rc, bc);
+
+                left += child.getMeasuredWidth() + lp.rightMargin
+                        + lp.leftMargin;
+            }
+            left = getPaddingLeft();
+            top += lineHeight;
         }
     }
 
@@ -323,7 +473,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 if (child != null) {
                     mCurrentItemIndex++;
                     if (child.getVisibility() != View.GONE) {
-                        setChildClickOperation(child);
+                        setChildClickOperation(child, -1);
                         int childLeft = (int) (getPaddingLeft() + j * (childAvWidth + mHorizontalSpace));
                         int childTop = (int) (getPaddingTop() + i * (childAvHeight + mVerticalSpace));
                         child.layout(childLeft, childTop, childLeft + childAvWidth, childAvHeight +childTop);
@@ -339,7 +489,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     private void setFlowLayout() {
         mAllViews.clear();
         mLineHeight.clear();
-
+        mWidthList.clear();
         int width = getWidth();
 
         int lineWidth = getPaddingLeft();
@@ -410,7 +560,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 if (child.getVisibility() == View.GONE) {
                     continue;
                 }
-                setChildClickOperation(child);
+                setChildClickOperation(child, -1);
                 MarginLayoutParams lp = (MarginLayoutParams) child
                         .getLayoutParams();
 
@@ -434,8 +584,9 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     /**
      * 执行子View的点击相关事件
      * @param child
+     * @param key
      */
-    private void setChildClickOperation(View child) {
+    private void setChildClickOperation(View child, final Integer key) {
         if (child.getTag()==null){
             child.setTag(mCurrentItemIndex);
         }
@@ -463,7 +614,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                     }
                 }
                 if (mOnItemClickListener != null) {
-                    mOnItemClickListener.onItemClick((Integer) view.getTag(),view);
+                    mOnItemClickListener.onItemClick((Integer)(key == -1 ? view.getTag() : key),view);
                 }
             }
         });
@@ -826,6 +977,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public void setLineCenter(boolean isCenter) {
         mIsCenter = isCenter;
+        requestLayout();
     }
 
     /**
@@ -834,6 +986,23 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public boolean isLineCenter() {
         return mIsCenter;
+    }
+
+    /**
+     * 设置紧密模式
+     * @param closeMode
+     */
+    public void setCloseMode(boolean closeMode) {
+        mIsCloseMode = closeMode;
+        requestLayout();
+    }
+
+    /**
+     * 是否设置了紧密模式
+     * @return
+     */
+    public boolean isCloseMode() {
+        return  mIsCloseMode;
     }
 
     public interface OnItemClickListener{
