@@ -127,7 +127,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mColumnNumbers = ta.getInteger(R.styleable.AutoFlowLayout_columnNumbers,0);
         mRowNumbers = ta.getInteger(R.styleable.AutoFlowLayout_rowNumbers,0);
         mCutLineColor = ta.getColor(R.styleable.AutoFlowLayout_cutLineColor,getResources().getColor(android.R.color.darker_gray));
-        mCutLineWidth = ta.getFloat(R.styleable.AutoFlowLayout_cutLineWidth,1f);
+        mCutLineWidth = ta.getDimension(R.styleable.AutoFlowLayout_cutLineWidth,1f);
         mIsCutLine = ta.getBoolean(R.styleable.AutoFlowLayout_cutLine,false);
         if (mColumnNumbers != 0) {
             mIsGridMode = true;
@@ -474,23 +474,42 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                         //不是最后一行  只画底部
                         if (i != mRowNumbers-1){
                             View nextChild = getChildAt(i * mColumnNumbers + j+mColumnNumbers);
-                            canvas.drawLine(child.getLeft(),(child.getBottom()+nextChild.getTop())/2,
+                            View preChild = getChildAt(i * mColumnNumbers + j - 1);
+                            canvas.drawLine((child.getLeft()+preChild.getRight())/2,(child.getBottom()+nextChild.getTop())/2,
                                     child.getRight(),(child.getBottom()+nextChild.getTop())/2,linePaint);
                         }
                     } else {
                         //最后一行 只画右部
                         if (i ==  mRowNumbers -1) {
                             View nextChild = getChildAt(i * mColumnNumbers + j + 1);
-                            canvas.drawLine((child.getRight()+nextChild.getLeft())/2, child.getTop(),
+                            View preChild = getChildAt(i * mColumnNumbers + j - mColumnNumbers);
+                            canvas.drawLine((child.getRight()+nextChild.getLeft())/2, (child.getTop()+preChild.getBottom())/2,
                                     (child.getRight()+nextChild.getLeft())/2,child.getBottom(),linePaint);
                         } else {
                             //底部 右部 都画
                             View  rightChild = getChildAt(i * mColumnNumbers + j + 1);
                             View  bottomChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
-                            canvas.drawLine((child.getRight()+rightChild.getLeft())/2, child.getTop(),
-                                    (child.getRight()+rightChild.getLeft())/2,child.getBottom(),linePaint);
-                            canvas.drawLine(child.getLeft(),(child.getBottom()+bottomChild.getTop())/2,
-                                    child.getRight(),(child.getBottom()+bottomChild.getTop())/2,linePaint);
+                            if (j == 0) {
+                                View followChild = getChildAt(i * mColumnNumbers + j + 1);
+                                canvas.drawLine(child.getLeft(),(child.getBottom()+bottomChild.getTop())/2,
+                                        (child.getRight()+followChild.getLeft())/2,(child.getBottom()+bottomChild.getTop())/2,linePaint);
+                            } else {
+                                View preChild = getChildAt(i * mColumnNumbers + j - 1);
+                                View followChild = getChildAt(i * mColumnNumbers + j + 1);
+                                canvas.drawLine((child.getLeft()+preChild.getRight())/2,(child.getBottom()+bottomChild.getTop())/2,
+                                        (child.getRight()+followChild.getLeft())/2,(child.getBottom()+bottomChild.getTop())/2,linePaint);
+                            }
+                            if (i == 0) {
+                                View followChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
+                                canvas.drawLine((child.getRight()+rightChild.getLeft())/2, child.getTop(),
+                                        (child.getRight()+rightChild.getLeft())/2,(child.getBottom()+followChild.getTop())/2,linePaint);
+                            } else {
+                                View preChild = getChildAt(i * mColumnNumbers + j - mColumnNumbers);
+                                View followChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
+                                canvas.drawLine((child.getRight()+rightChild.getLeft())/2, (child.getTop()+preChild.getBottom())/2,
+                                        (child.getRight()+rightChild.getLeft())/2,(child.getBottom()+followChild.getTop())/2,linePaint);
+                            }
+
                         }
 
                     }
