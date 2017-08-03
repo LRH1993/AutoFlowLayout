@@ -2,6 +2,8 @@ package com.example.lvruheng.autoflowlayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -90,7 +92,18 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 是否设置了网格布局
      */
     private boolean mIsGridMode;
-
+    /**
+     * 是否设置了分割线
+     */
+    private boolean mIsCutLine;
+    /**
+     *记录分割线的宽度
+     */
+    private float mCutLineWidth;
+    /**
+     *记录分割线的长度
+     */
+    private int mCutLineColor;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -113,6 +126,9 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mVerticalSpace = ta.getInteger(R.styleable.AutoFlowLayout_verticalSpace,0);
         mColumnNumbers = ta.getInteger(R.styleable.AutoFlowLayout_columnNumbers,0);
         mRowNumbers = ta.getInteger(R.styleable.AutoFlowLayout_rowNumbers,0);
+        mCutLineColor = ta.getColor(R.styleable.AutoFlowLayout_cutLineColor,getResources().getColor(android.R.color.darker_gray));
+        mCutLineWidth = ta.getFloat(R.styleable.AutoFlowLayout_cutLineWidth,1f);
+        mIsCutLine = ta.getBoolean(R.styleable.AutoFlowLayout_cutLine,false);
         if (mColumnNumbers != 0) {
             mIsGridMode = true;
         }
@@ -439,6 +455,23 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     }
 
     /**
+     * 网格布局状态下，绘制分割线
+     * @param canvas
+     */
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (mIsGridMode && mIsCutLine) {
+            Paint linePaint = new Paint();
+            linePaint.setStyle(Paint.Style.STROKE);
+            linePaint.setStrokeWidth(mCutLineWidth);
+            linePaint.setColor(mCutLineColor);
+
+
+        }
+    }
+
+    /**
      * 判断是否还有跟多View未展示
      * @param i 当前展示的View
      * @param count 总共需要展示的View
@@ -634,7 +667,6 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mVerticalSpace = verticalSpace;
         requestLayout();
     }
-
     /**
      * 返回网格布局的垂直距离
      */
@@ -674,6 +706,53 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         return mRowNumbers;
     }
 
+    /**
+     * 设置分割线的宽度
+     * @param width
+     */
+    public void setCutLineWidth (float width) {
+        mCutLineWidth = width;
+    }
+
+    /**
+     * 获取分割线的宽度
+     * @return
+     */
+    public float getCutLineWidth() {
+        return mCutLineWidth;
+    }
+
+    /**
+     * 设置分割线的颜色
+     * @param color
+     */
+    public void setCutLineColor (int color) {
+        mCutLineColor = color;
+    }
+
+    /**
+     * 获取分割线的颜色
+     * @return
+     */
+    public int getCutLineColor () {
+        return mCutLineColor;
+    }
+
+    /**
+     * 设置分割线
+     * @param isCutLine true 设置 false 不设置
+     */
+    public void setCutLine(boolean isCutLine) {
+        mIsCutLine = isCutLine;
+    }
+
+    /**
+     * 是否设置了分割线
+     * @return
+     */
+    public boolean hasCutLine() {
+        return mIsCutLine;
+    }
 
     public interface OnItemClickListener{
         void onItemClick(int position,View view);
