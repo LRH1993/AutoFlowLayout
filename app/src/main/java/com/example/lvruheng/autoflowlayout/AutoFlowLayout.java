@@ -190,7 +190,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
                     if (child.getVisibility() != GONE) {
                         measureChild(child,widthMeasureSpec,heightMeasureSpec);
                         // 得到child的lp
-                        FlowLayoutParams lp = (FlowLayoutParams) child
+                        MarginLayoutParams lp = (MarginLayoutParams) child
                                 .getLayoutParams();
                         maxWidth +=child.getMeasuredWidth()+lp.leftMargin+lp.rightMargin;
                         maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight()+lp.topMargin+lp.bottomMargin);
@@ -249,7 +249,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
             // 测量每一个child的宽和高
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
             // 得到child的lp
-            FlowLayoutParams  lp = (FlowLayoutParams) child
+            MarginLayoutParams  lp = (MarginLayoutParams) child
                      .getLayoutParams();
             // 当前子空间实际占据的宽度
             int childWidth = child.getMeasuredWidth() + lp.leftMargin
@@ -312,7 +312,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
         int sizeHeight = getHeight();
         //子View的平均宽高 默认所有View宽高一致
         View  tempChild = getChildAt(0);
-        FlowLayoutParams  lp = (FlowLayoutParams) tempChild
+        MarginLayoutParams  lp = (MarginLayoutParams) tempChild
                 .getLayoutParams();
         int childAvWidth = (int) ((sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers)-lp.leftMargin-lp.rightMargin;
         int childAvHeight = (int) ((sizeHeight - getPaddingTop() - getPaddingBottom() - mVerticalSpace * (mRowNumbers-1))/mRowNumbers)-lp.topMargin-lp.bottomMargin;
@@ -352,7 +352,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
         // 遍历所有的孩子
         for (int i = 0; i < cCount; i++) {
             View child = getChildAt(i);
-            FlowLayoutParams  lp = (FlowLayoutParams) child
+            MarginLayoutParams  lp = (MarginLayoutParams) child
                     .getLayoutParams();
             int childWidth = child.getMeasuredWidth();
             int childHeight = child.getMeasuredHeight();
@@ -413,7 +413,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
                     continue;
                 }
                 setChildClickOperation(child, -1);
-                FlowLayoutParams  lp = (FlowLayoutParams) child
+                MarginLayoutParams  lp = (MarginLayoutParams) child
                         .getLayoutParams();
 
                 //计算childView的left,top,right,bottom
@@ -428,50 +428,28 @@ public class AutoFlowLayout <T> extends ViewGroup  {
                 left += child.getMeasuredWidth() + lp.rightMargin
                         + lp.leftMargin;
             }
-            FlowLayoutParams  lp = (FlowLayoutParams) getChildAt(0)
+            MarginLayoutParams  lp = (MarginLayoutParams) getChildAt(0)
                     .getLayoutParams();
             left = getPaddingLeft();
             top += lineHeight + lp.topMargin + lp.bottomMargin;
         }
     }
-    public static class FlowLayoutParams extends MarginLayoutParams {
 
-        public FlowLayoutParams(Context c, AttributeSet attrs) {
-            super(c, attrs);
-        }
-
-        public FlowLayoutParams(int width, int height) {
-            super(width, height);
-        }
-
-        public FlowLayoutParams(ViewGroup.LayoutParams source) {
-            super(source);
-        }
-    }
 
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs)
     {
-        return new FlowLayoutParams(getContext(), attrs);
+        return new MarginLayoutParams(getContext(), attrs);
     }
 
     @Override
-    protected LayoutParams generateDefaultLayoutParams()
-    {
-        return new FlowLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    protected LayoutParams generateLayoutParams(LayoutParams p) {
+        return new MarginLayoutParams(p);
     }
-
     @Override
-    protected LayoutParams generateLayoutParams(LayoutParams p)
-    {
-        return new FlowLayoutParams(p);
+    protected LayoutParams generateDefaultLayoutParams() {
+        return new MarginLayoutParams(super.generateDefaultLayoutParams());
     }
-
-    @Override
-    protected boolean checkLayoutParams(LayoutParams p) {
-        return p instanceof FlowLayoutParams;
-    }
-
     /**
      * 执行子View的点击相关事件
      * @param child
@@ -537,41 +515,29 @@ public class AutoFlowLayout <T> extends ViewGroup  {
                     if (j == mColumnNumbers-1) {
                         //不是最后一行  只画底部
                         if (i != mRowNumbers-1){
-                            View nextChild = getChildAt(i * mColumnNumbers + j+mColumnNumbers);
-                            View preChild = getChildAt(i * mColumnNumbers + j - 1);
-                            canvas.drawLine((child.getLeft()+preChild.getRight())/2,(child.getBottom()+nextChild.getTop())/2,
-                                    child.getRight(),(child.getBottom()+nextChild.getTop())/2,linePaint);
+                            canvas.drawLine(child.getLeft()-mHorizontalSpace/2,child.getBottom()+mVerticalSpace/2,
+                                    child.getRight(),child.getBottom()+mVerticalSpace/2,linePaint);
                         }
                     } else {
                         //最后一行 只画右部
                         if (i ==  mRowNumbers -1) {
-                            View nextChild = getChildAt(i * mColumnNumbers + j + 1);
-                            View preChild = getChildAt(i * mColumnNumbers + j - mColumnNumbers);
-                            canvas.drawLine((child.getRight()+nextChild.getLeft())/2, (child.getTop()+preChild.getBottom())/2,
-                                    (child.getRight()+nextChild.getLeft())/2,child.getBottom(),linePaint);
+                            canvas.drawLine(child.getRight()+mHorizontalSpace/2, child.getTop()-mVerticalSpace/2,
+                                    child.getRight()+mHorizontalSpace/2,child.getBottom(),linePaint);
                         } else {
                             //底部 右部 都画
-                            View  rightChild = getChildAt(i * mColumnNumbers + j + 1);
-                            View  bottomChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
                             if (j == 0) {
-                                View followChild = getChildAt(i * mColumnNumbers + j + 1);
-                                canvas.drawLine(child.getLeft(),(child.getBottom()+bottomChild.getTop())/2,
-                                        (child.getRight()+followChild.getLeft())/2,(child.getBottom()+bottomChild.getTop())/2,linePaint);
+                                canvas.drawLine(child.getLeft(),child.getBottom()+mVerticalSpace/2,
+                                        child.getRight()+mHorizontalSpace/2,child.getBottom()+mVerticalSpace/2,linePaint);
                             } else {
-                                View preChild = getChildAt(i * mColumnNumbers + j - 1);
-                                View followChild = getChildAt(i * mColumnNumbers + j + 1);
-                                canvas.drawLine((child.getLeft()+preChild.getRight())/2,(child.getBottom()+bottomChild.getTop())/2,
-                                        (child.getRight()+followChild.getLeft())/2,(child.getBottom()+bottomChild.getTop())/2,linePaint);
+                                canvas.drawLine(child.getLeft()-mHorizontalSpace/2,child.getBottom()+mVerticalSpace/2,
+                                        child.getRight()+mHorizontalSpace/2,child.getBottom()+mVerticalSpace/2,linePaint);
                             }
                             if (i == 0) {
-                                View followChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
-                                canvas.drawLine((child.getRight()+rightChild.getLeft())/2, child.getTop(),
-                                        (child.getRight()+rightChild.getLeft())/2,(child.getBottom()+followChild.getTop())/2,linePaint);
+                                canvas.drawLine(child.getRight()+mHorizontalSpace/2, child.getTop(),
+                                        child.getRight()+mHorizontalSpace/2,child.getBottom()+mVerticalSpace/2,linePaint);
                             } else {
-                                View preChild = getChildAt(i * mColumnNumbers + j - mColumnNumbers);
-                                View followChild = getChildAt(i * mColumnNumbers + j + mColumnNumbers);
-                                canvas.drawLine((child.getRight()+rightChild.getLeft())/2, (child.getTop()+preChild.getBottom())/2,
-                                        (child.getRight()+rightChild.getLeft())/2,(child.getBottom()+followChild.getTop())/2,linePaint);
+                                canvas.drawLine(child.getRight()+mHorizontalSpace/2, child.getTop()-mVerticalSpace/2,
+                                        child.getRight()+mHorizontalSpace/2,child.getBottom()+mVerticalSpace/2,linePaint);
                             }
 
                         }
