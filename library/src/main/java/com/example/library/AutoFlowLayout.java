@@ -463,7 +463,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
             @Override
             public boolean onLongClick(View view) {
                 mOnLongItemClickListener.onLongItemClick((Integer)(key == -1 ? view.getTag() : key),view);
-                return false;
+                return true;
             }
         });
         child.setOnClickListener(new OnClickListener() {
