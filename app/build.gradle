@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.0"
     defaultConfig {
-        applicationId "com.example.lvruheng.superlinelayout"
+        applicationId "com.example.lvruheng.autoflowlayout"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
