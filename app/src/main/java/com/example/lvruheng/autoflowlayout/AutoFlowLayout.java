@@ -232,6 +232,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * @param heightMeasureSpec
      */
     private void setFlowMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mCount =0 ;
         // 获得它的父容器为它设置的测量模式和大小
         int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
         int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -343,6 +344,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     private void setFlowLayout() {
         mCurrentItemIndex = -1;
+        mCount = 0;
         mAllViews.clear();
         mLineHeight.clear();
         mWidthList.clear();
