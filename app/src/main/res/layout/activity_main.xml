@@ -1,12 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:gravity="center"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/tv_normal_flow"
+        android:textSize="16sp"
+        android:padding="10dp"
+        android:text="普通的流式标签场景"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/tv_special_flow"
+        android:textSize="16sp"
+        android:padding="10dp"
+        android:text="特殊的流式标签场景"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/tv_normal_grid"
+        android:textSize="16sp"
+        android:padding="10dp"
+        android:text="普通的网格布局场景"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/tv_special_grid"
+        android:textSize="16sp"
+        android:padding="10dp"
+        android:text="特殊的网格布局场景"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
-    <com.example.lvruheng.autoflowlayout.AutoFlowLayout
-        android:id="@+id/afl_cotent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-</RelativeLayout>
+</LinearLayout>

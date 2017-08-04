@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -115,6 +116,10 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 是否每行居中处理
      */
     private boolean mIsCenter;
+    /**
+     * 长按监听
+     */
+    private OnLongItemClickListener mOnLongItemClickListener;
     public AutoFlowLayout(Context context) {
         super(context);
     }
@@ -310,6 +315,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      * 网格布局的布局模式
      */
     private void setGridLayout() {
+        mCheckedViews.clear();
         mCurrentItemIndex = -1;
         int sizeWidth = getWidth();
         int sizeHeight = getHeight();
@@ -340,6 +346,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mAllViews.clear();
         mLineHeight.clear();
         mWidthList.clear();
+        mCheckedViews.clear();
         int width = getWidth();
 
         int lineWidth = getPaddingLeft();
@@ -440,6 +447,13 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         if (child.getTag()==null){
             child.setTag(mCurrentItemIndex);
         }
+        child.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                mOnLongItemClickListener.onLongItemClick((Integer)(key == -1 ? view.getTag() : key),view);
+                return false;
+            }
+        });
         child.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -613,11 +627,25 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     }
 
     /**
+     * 删除所有view
+     * @return
+     */
+    public boolean clearViews(){
+        if (getChildCount() > 0) {
+            removeAllViews();
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
      * 设置最多显示的行数
      * @param number
      */
     public void setMaxLines(int number) {
         mMaxLineNumbers = number;
+        requestLayout();
     }
 
     /**
@@ -626,6 +654,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
      */
     public void setSingleLine(boolean isSingle) {
         mIsSingleLine = isSingle;
+        requestLayout();
     }
 
     /**
@@ -844,7 +873,12 @@ public class AutoFlowLayout <T> extends LinearLayout  {
     public void setOnItemClickListener(OnItemClickListener onItemClickListener){
         mOnItemClickListener = onItemClickListener;
     }
-
+    public interface OnLongItemClickListener{
+        void onLongItemClick(int position,View view);
+    }
+    public void setOnLongItemClickListener(OnLongItemClickListener onLongItemClickListener){
+        mOnLongItemClickListener = onLongItemClickListener;
+    }
 
 
 }

@@ -16,6 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".NormalFlowActivity"></activity>
+        <activity android:name=".SpecialFlowActivity"></activity>
+        <activity android:name=".NormalGridActivity"></activity>
+        <activity android:name=".SpecialGridActivity"></activity>
     </application>
 
 </manifest>
