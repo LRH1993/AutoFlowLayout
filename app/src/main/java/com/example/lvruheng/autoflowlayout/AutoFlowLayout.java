@@ -5,20 +5,17 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
-import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  *自定义LinearLayout，支持自动换行，指定行数,实现流式布局
  */
-public class AutoFlowLayout <T> extends LinearLayout  {
+public class AutoFlowLayout <T> extends ViewGroup  {
     /**
      * 存储所有的View，按行记录
      */
@@ -150,11 +147,9 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             mIsGridMode = true;
         }
         ta.recycle();
-        setOrientation(HORIZONTAL);
     }
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (mIsGridMode) {
             setGridMeasure(widthMeasureSpec,heightMeasureSpec);
         } else {
@@ -197,12 +192,12 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 final View child = getChildAt(i * mColumnNumbers + j);
                 if (child != null) {
                     if (child.getVisibility() != GONE) {
-                        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                        final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec, 0, lp.width);
-                        final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, 0, lp.height);
-                        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-                        maxWidth +=child.getMeasuredWidth();
-                        maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight());
+                        measureChild(child,widthMeasureSpec,heightMeasureSpec);
+                        // 得到child的lp
+                        FlowLayoutParams lp = (FlowLayoutParams) child
+                                .getLayoutParams();
+                        maxWidth +=child.getMeasuredWidth()+lp.leftMargin+lp.rightMargin;
+                        maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight()+lp.topMargin+lp.bottomMargin);
                     }
                 }
             }
@@ -258,8 +253,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
             // 测量每一个child的宽和高
             measureChild(child, widthMeasureSpec, heightMeasureSpec);
             // 得到child的lp
-            MarginLayoutParams lp = (MarginLayoutParams) child
-                    .getLayoutParams();
+            FlowLayoutParams  lp = (FlowLayoutParams) child
+                     .getLayoutParams();
             // 当前子空间实际占据的宽度
             int childWidth = child.getMeasuredWidth() + lp.leftMargin
                     + lp.rightMargin;
@@ -303,7 +298,6 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 : height);
     }
 
-
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if (mIsGridMode) {
@@ -320,9 +314,12 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         mCurrentItemIndex = -1;
         int sizeWidth = getWidth();
         int sizeHeight = getHeight();
-        //子View的平均宽高
-        int childAvWidth = (int) ((sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers);
-        int childAvHeight = (int) ((sizeHeight - getPaddingTop() - getPaddingBottom() - mVerticalSpace * (mRowNumbers-1))/mRowNumbers);
+        //子View的平均宽高 默认所有View宽高一致
+        View  tempChild = getChildAt(0);
+        FlowLayoutParams  lp = (FlowLayoutParams) tempChild
+                .getLayoutParams();
+        int childAvWidth = (int) ((sizeWidth - getPaddingLeft() - getPaddingRight() - mHorizontalSpace * (mColumnNumbers-1))/mColumnNumbers)-lp.leftMargin-lp.rightMargin;
+        int childAvHeight = (int) ((sizeHeight - getPaddingTop() - getPaddingBottom() - mVerticalSpace * (mRowNumbers-1))/mRowNumbers)-lp.topMargin-lp.bottomMargin;
         for (int i = 0; i < mRowNumbers; i++) {
             for (int j = 0; j < mColumnNumbers; j++) {
                 final View child = getChildAt(i * mColumnNumbers + j);
@@ -330,8 +327,8 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                     mCurrentItemIndex++;
                     if (child.getVisibility() != View.GONE) {
                         setChildClickOperation(child, -1);
-                        int childLeft = (int) (getPaddingLeft() + j * (childAvWidth + mHorizontalSpace));
-                        int childTop = (int) (getPaddingTop() + i * (childAvHeight + mVerticalSpace));
+                        int childLeft = (int) (getPaddingLeft() + j * (childAvWidth + mHorizontalSpace))+j * (lp.leftMargin + lp.rightMargin) + lp.leftMargin;
+                        int childTop = (int) (getPaddingTop() + i * (childAvHeight + mVerticalSpace)) + i * (lp.topMargin + lp.bottomMargin) + lp.topMargin;
                         child.layout(childLeft, childTop, childLeft + childAvWidth, childAvHeight +childTop);
                     }
                 }
@@ -359,7 +356,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
         // 遍历所有的孩子
         for (int i = 0; i < cCount; i++) {
             View child = getChildAt(i);
-            MarginLayoutParams lp = (MarginLayoutParams) child
+            FlowLayoutParams  lp = (FlowLayoutParams) child
                     .getLayoutParams();
             int childWidth = child.getMeasuredWidth();
             int childHeight = child.getMeasuredHeight();
@@ -420,7 +417,7 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                     continue;
                 }
                 setChildClickOperation(child, -1);
-                MarginLayoutParams lp = (MarginLayoutParams) child
+                FlowLayoutParams  lp = (FlowLayoutParams) child
                         .getLayoutParams();
 
                 //计算childView的left,top,right,bottom
@@ -435,9 +432,48 @@ public class AutoFlowLayout <T> extends LinearLayout  {
                 left += child.getMeasuredWidth() + lp.rightMargin
                         + lp.leftMargin;
             }
+            FlowLayoutParams  lp = (FlowLayoutParams) getChildAt(0)
+                    .getLayoutParams();
             left = getPaddingLeft();
-            top += lineHeight;
+            top += lineHeight + lp.topMargin + lp.bottomMargin;
         }
+    }
+    public static class FlowLayoutParams extends MarginLayoutParams {
+
+        public FlowLayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+        }
+
+        public FlowLayoutParams(int width, int height) {
+            super(width, height);
+        }
+
+        public FlowLayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs)
+    {
+        return new FlowLayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected LayoutParams generateDefaultLayoutParams()
+    {
+        return new FlowLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    @Override
+    protected LayoutParams generateLayoutParams(LayoutParams p)
+    {
+        return new FlowLayoutParams(p);
+    }
+
+    @Override
+    protected boolean checkLayoutParams(LayoutParams p) {
+        return p instanceof FlowLayoutParams;
     }
 
     /**
