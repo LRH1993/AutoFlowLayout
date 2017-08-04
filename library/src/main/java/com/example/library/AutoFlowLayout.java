@@ -1,4 +1,4 @@
-package com.example.lvruheng.autoflowlayout;
+package com.example.library;
 
 import android.content.Context;
 import android.content.res.TypedArray;

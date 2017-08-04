@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AutoFlowLayout">
+        <attr name="singleLine" format="boolean"></attr>
+        <attr name="maxLines" format="integer"></attr>
+        <attr name="multiChecked" format="boolean"></attr>
+        <attr name="horizontalSpace" format="dimension"></attr>
+        <attr name="verticalSpace" format="dimension"></attr>
+        <attr name="columnNumbers" format="integer"></attr>
+        <attr name="rowNumbers" format="integer"></attr>
+        <attr name="cutLineWidth" format="dimension"></attr>
+        <attr name="cutLineColor" format="color"></attr>
+        <attr name="cutLine" format="boolean"></attr>
+        <attr name="lineCenter" format="boolean"></attr>
+    </declare-styleable>
+</resources>
