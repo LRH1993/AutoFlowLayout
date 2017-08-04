@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="100dp"
+              android:layout_height="100dp"
+              android:paddingBottom="12dp"
+              android:paddingTop="12dp"
+              android:paddingLeft="8dp"
+              android:gravity="center"
+              android:paddingRight="8dp"
+              android:orientation="vertical">
+    <TextView
+        android:gravity="center"
+        android:drawableLeft="@mipmap/ic_launcher"
+        android:id="@+id/tv_attr_tag"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="6dp"
+        android:paddingTop="6dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textSize="16sp"
+        android:textColor="@color/btn_common_text"
+        android:background="@drawable/bg_sub_tag">
+
+    </TextView>
+</FrameLayout>

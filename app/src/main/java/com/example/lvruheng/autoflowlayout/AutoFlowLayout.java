@@ -58,10 +58,6 @@ public class AutoFlowLayout <T> extends ViewGroup  {
      */
     private boolean mIsMultiChecked;
     /**
-     * 设置View的选中/未选中背景色或者单纯的背景色
-     */
-    private Drawable mViewBgDrawable;
-    /**
      * 记录选中的View
      */
     private View mSelectedView;
@@ -605,9 +601,6 @@ public class AutoFlowLayout <T> extends ViewGroup  {
         }
         for (int i = 0; i < views.size(); i++) {
             View view = views.get(i);
-            if (mViewBgDrawable != null) {
-                view.setBackgroundDrawable(mViewBgDrawable);
-            }
             addView(view);
         }
         requestLayout();
@@ -729,13 +722,6 @@ public class AutoFlowLayout <T> extends ViewGroup  {
     public void setMultiChecked(boolean isMultiChecked) {
         mIsMultiChecked = isMultiChecked;
     }
-    /**
-     * 设置选择背景
-     * @param drawable  selector 设置选中与未选中的背景或者单纯的背景色
-     */
-    public void setCheckedBackgorud(Drawable drawable) {
-        mViewBgDrawable = drawable;
-    }
 
     /**
      * 获得选中的View集合
@@ -811,6 +797,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
      */
     public void setColumnNumbers(int columnNumbers) {
         mColumnNumbers = columnNumbers;
+        requestLayout();
     }
 
     /**
@@ -827,6 +814,7 @@ public class AutoFlowLayout <T> extends ViewGroup  {
      */
     public void setRowNumbers(int rowNumbers) {
         mRowNumbers = rowNumbers;
+        requestLayout();
     }
 
     /**

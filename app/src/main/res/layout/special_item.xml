@@ -2,14 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
-             android:layout_marginTop="12dp"
-             android:layout_marginBottom="12dp"
-             android:layout_marginLeft="8dp"
+             android:paddingTop="12dp"
+             android:paddingBottom="12dp"
+             android:paddingLeft="8dp"
              android:gravity="center"
-             android:layout_marginRight="8dp"
+             android:paddingRight="8dp"
              android:orientation="vertical">
     <TextView
-        android:text="你好"
         android:id="@+id/tv_attr_tag"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
