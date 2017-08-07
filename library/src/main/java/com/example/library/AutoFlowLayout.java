@@ -462,8 +462,11 @@ public class AutoFlowLayout <T> extends ViewGroup  {
         child.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                mOnLongItemClickListener.onLongItemClick((Integer)(key == -1 ? view.getTag() : key),view);
-                return true;
+                if (mOnLongItemClickListener != null) {
+                    mOnLongItemClickListener.onLongItemClick((Integer)(key == -1 ? view.getTag() : key),view);
+                    return true;
+                }
+                return false;
             }
         });
         child.setOnClickListener(new OnClickListener() {
