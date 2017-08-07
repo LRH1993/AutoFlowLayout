@@ -49,7 +49,7 @@ allprojects {
 ②.在 module 的 build.gradle 文件中添加依赖
 ```
 dependencies {
-	        compile 'com.github.LRH1993:AutoFlowLayout:1.0.2'
+	        compile 'com.github.LRH1993:AutoFlowLayout:1.0.4'
 	}
 ```
 #### 2.属性说明
