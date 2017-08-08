@@ -176,12 +176,13 @@ public class AutoFlowLayout <T> extends ViewGroup  {
         int widthResult;
         //未设置行数 推测行数
         if (mRowNumbers == 0) {
-            mRowNumbers = getChildCount()/mColumnNumbers == 0 ?
+            mRowNumbers = getChildCount()%mColumnNumbers == 0 ?
                     getChildCount()/mColumnNumbers : (getChildCount()/mColumnNumbers + 1);
         }
         int maxChildHeight = 0;
         int maxWidth = 0;
         int maxHeight = 0;
+        int maxLineWidth = 0;
         //统计最大高度/最大宽度
         for (int i = 0; i <  mRowNumbers; i++) {
             for (int j = 0; j < mColumnNumbers; j++) {
@@ -192,11 +193,13 @@ public class AutoFlowLayout <T> extends ViewGroup  {
                         // 得到child的lp
                         MarginLayoutParams lp = (MarginLayoutParams) child
                                 .getLayoutParams();
-                        maxWidth +=child.getMeasuredWidth()+lp.leftMargin+lp.rightMargin;
+                        maxLineWidth +=child.getMeasuredWidth()+lp.leftMargin+lp.rightMargin;
                         maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight()+lp.topMargin+lp.bottomMargin);
                     }
                 }
             }
+            maxWidth = Math.max(maxLineWidth,maxWidth);
+            maxLineWidth = 0;
             maxHeight += maxChildHeight;
             maxChildHeight = 0;
         }
